@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monkey Productivity RPG</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+background:#0f172a;
+color:white;
+padding:20px;
+}
+
+.container{
+max-width:1400px;
+margin:auto;
+}
+
+h1{
+text-align:center;
+margin-bottom:20px;
+color:#facc15;
+}
+
+.grid{
+display:grid;
+grid-template-columns:370px 1fr;
+gap:20px;
+}
+
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+
+.character{
+text-align:center;
+}
+
+.avatar{
+font-size:90px;
+margin-bottom:10px;
+}
+
+.level{
+font-size:20px;
+font-weight:bold;
+margin:10px 0;
+}
+
+.progress-container{
+height:25px;
+background:#334155;
+border-radius:30px;
+overflow:hidden;
+margin-top:10px;
+}
+
+.progress{
+height:100%;
+background:linear-gradient(90deg,#22c55e,#84cc16);
+width:0%;
+transition:.3s;
+}
+
+.gold{
+color:gold;
+margin-top:10px;
+}
+
+.stat{
+display:flex;
+justify-content:space-between;
+margin-top:8px;
+}
+
+input{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:8px;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:#22c55e;
+color:white;
+font-weight:bold;
+}
+
+button:hover{
+opacity:.9;
+}
+
+.task{
+background:#334155;
+padding:15px;
+margin-top:10px;
+border-radius:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+}
+
+.task button{
+width:auto;
+margin:0;
+}
+
+.inventory-item{
+background:#334155;
+padding:10px;
+border-radius:8px;
+margin-top:8px;
+}
+
+.achievement{
+background:#14532d;
+padding:10px;
+border-radius:8px;
+margin-top:8px;
+}
+
+.small{
+font-size:13px;
+color:#cbd5e1;
+}
+
+@media(max-width:900px){
+.grid{
+grid-template-columns:1fr;
+}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>🐒 Monkey Productivity RPG 🍌</h1>
+
+<div class="grid">
+
+<div>
+
+<div class="card character">
+
+<div id="avatar" class="avatar">🐒</div>
+
+<h2 id="evolution">Bébé Singe</h2>
+
+<p id="island" class="small">🏝️ Île Débutante</p>
+
+<div class="level">
+Niveau <span id="level">1</span>
+</div>
+
+<div class="progress-container">
+<div class="progress" id="xpBar"></div>
+</div>
+
+<p id="xpText">0 / 100 XP</p>
+
+<h3 class="gold">
+💰 <span id="gold">0</span> Gold
+</h3>
+
+<div class="stat">
+<span>📈 Bonus XP</span>
+<span id="xpBonus">100%</span>
+</div>
+
+<div class="stat">
+<span>🔥 Streak</span>
+<span id="streak">0 jours</span>
+</div>
+
+<div class="stat">
+<span>✅ Tâches</span>
+<span id="completedTasksDisplay">0</span>
+</div>
+
+<div class="stat">
+<span>🌟 Prestige</span>
+<span id="prestige">0</span>
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>🍌 Boutique XP</h2>
+
+<button onclick="buyBanana()">
+🍌 Banane +10% XP (50 Gold)
+</button>
+
+<button onclick="buyGoldenBanana()">
+🍌✨ Banane Dorée +25% XP (200 Gold)
+</button>
+
+<button onclick="buyLegendaryBanana()">
+👑 Banane Légendaire +50% XP (500 Gold)
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>🎨 Cosmétiques</h2>
+
+<div id="cosmeticShop"></div>
+
+</div>
+
+<div class="card">
+
+<h2>🎒 Inventaire</h2>
+
+<div id="inventory"></div>
+
+</div>
+
+<div class="card">
+
+<h2>🏆 Succès</h2>
+
+<div id="achievements"></div>
+
+</div>
+
+</div>
+
+<div>
+
+<div class="card">
+
+<h2>✅ Nouvelle tâche</h2>
+
+<input
+id="taskName"
+placeholder="Nom de la tâche">
+
+<input
+id="taskXp"
+type="number"
+placeholder="XP gagnée">
+
+<button onclick="addTask()">
+Ajouter la tâche
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>📋 Tâches</h2>
+
+<div id="tasks"></div>
+
+</div>
+
+<div class="card">
+
+<h2>👹 Boss de l'île</h2>
+
+<p>Niveau Boss : <span id="bossLevel">1</span></p>
+<p>PV : <span id="bossHealth">100</span></p>
+
+<button onclick="attackBoss()">
+⚔️ Attaquer le Boss
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>🌟 Prestige</h2>
+
+<p>
+Requiert niveau 100
+</p>
+
+<button onclick="prestigeMonkey()">
+Recommencer (+50% XP permanent)
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>📊 Statistiques</h2>
+
+<p>Total XP : <span id="totalXp">0</span></p>
+<p>Total tâches : <span id="completedTasks">0</span></p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const cosmetics = [
+
+{name:"🐒 Classique",emoji:"🐒",price:0},
+{name:"😎 Cool",emoji:"😎🐒",price:100},
+{name:"🤠 Cowboy",emoji:"🤠🐒",price:250},
+{name:"👑 Roi",emoji:"👑🐒",price:500},
+{name:"🦸 Super",emoji:"🦸🐒",price:1000},
+{name:"🤖 Cyber",emoji:"🤖🐒",price:2000},
+{name:"🔥 Feu",emoji:"🔥🐒",price:5000},
+{name:"⚡ Divin",emoji:"⚡🐒",price:7500},
+{name:"🌌 Cosmique",emoji:"🌌🐒",price:10000}
+
+];
+
+let player = JSON.parse(localStorage.getItem("player")) || {
+
+level:1,
+xp:0,
+gold:0,
+xpMultiplier:1,
+
+completedTasks:0,
+totalXp:0,
+
+streak:0,
+lastTaskDate:null,
+
+bossLevel:1,
+bossHealth:100,
+
+prestige:0,
+
+equippedCosmetic:"🐒",
+ownedCosmetics:["🐒"],
+
+inventory:[],
+achievements:[]
+
+};
+
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+function save(){
+localStorage.setItem("player",JSON.stringify(player));
+localStorage.setItem("tasks",JSON.stringify(tasks));
+}
+
+function xpNeeded(){
+return player.level * 100;
+}
+
+function getMonkeyEvolution(){
+
+if(player.level>=50) return "🌟 Singe Cosmique";
+if(player.level>=40) return "⚡ Singe Divin";
+if(player.level>=30) return "👑 Roi des Singes";
+if(player.level>=20) return "🦍 Gorille Guerrier";
+if(player.level>=10) return "🙉 Singe Agile";
+
+return "🐒 Bébé Singe";
+}
+
+function getIsland(){
+
+if(player.level>=50) return "🌌 Île Cosmique";
+if(player.level>=40) return "⚡ Île Divine";
+if(player.level>=30) return "👑 Royaume des Singes";
+if(player.level>=20) return "🦍 Jungle du Gorille";
+if(player.level>=10) return "🌴 Île Tropicale";
+
+return "🏕️ Île Débutante";
+}
+
+function addTask(){
+
+let name=document.getElementById("taskName").value;
+let xp=parseInt(document.getElementById("taskXp").value);
+
+if(!name || !xp) return;
+
+tasks.push({name,xp});
+
+document.getElementById("taskName").value="";
+document.getElementById("taskXp").value="";
+
+updateUI();
+}
+
+function completeTask(index){
+
+let task=tasks[index];
+
+let gainedXp=Math.floor(
+task.xp * player.xpMultiplier
+);
+
+player.xp+=gainedXp;
+player.totalXp+=gainedXp;
+
+player.gold+=Math.floor(task.xp/2);
+
+const today=new Date().toDateString();
+
+if(player.lastTaskDate!==today){
+
+let yesterday=new Date();
+yesterday.setDate(yesterday.getDate()-1);
+
+if(
+player.lastTaskDate===
+yesterday.toDateString()
+){
+player.streak++;
+}else if(player.lastTaskDate!==today){
+player.streak=1;
+}
+
+player.lastTaskDate=today;
+}
+
+player.completedTasks++;
+
+while(player.xp>=xpNeeded()){
+
+player.xp-=xpNeeded();
+player.level++;
+
+if(player.level % 10 === 0){
+alert("🎉 ÉVOLUTION !\n"+getMonkeyEvolution());
+}
+}
+
+if(Math.random()<0.05){
+
+player.inventory.push(
+"🍌💎 Banane Rare +5%"
+);
+
+player.xpMultiplier+=0.05;
+
+alert("🎁 Banane Rare trouvée !");
+}
+
+if(player.completedTasks % 10 === 0){
+
+let reward=Math.random();
+
+if(reward<0.4){
+
+player.gold+=100;
+alert("📦 Coffre : 100 Gold");
+
+}else if(reward<0.8){
+
+player.xpMultiplier+=0.10;
+alert("📦 Coffre : +10% XP");
+
+}else{
+
+player.inventory.push(
+"🍌👑 Banane Mythique"
+);
+
+player.xpMultiplier+=0.25;
+
+alert("📦 Banane Mythique !");
+}
+}
+
+tasks.splice(index,1);
+
+checkAchievements();
+updateUI();
+}
+
+function attackBoss(){
+
+let damage=Math.floor(player.level*5);
+
+player.bossHealth-=damage;
+
+if(player.bossHealth<=0){
+
+alert("🏆 Boss vaincu !");
+
+player.gold+=player.bossLevel*200;
+player.xp+=player.bossLevel*500;
+
+player.bossLevel++;
+player.bossHealth=player.bossLevel*150;
+}
+
+updateUI();
+}
+
+function prestigeMonkey(){
+
+if(player.level<100){
+
+alert(
+"Tu dois atteindre le niveau 100."
+);
+
+return;
+}
+
+player.prestige++;
+player.level=1;
+player.xp=0;
+player.xpMultiplier+=0.5;
+
+alert(
+"🌟 Prestige obtenu !"
+);
+
+updateUI();
+}
+
+function buyBanana(){
+
+if(player.gold<50) return;
+
+player.gold-=50;
+player.xpMultiplier+=0.10;
+
+player.inventory.push(
+"🍌 Banane +10%"
+);
+
+updateUI();
+}
+
+function buyGoldenBanana(){
+
+if(player.gold<200) return;
+
+player.gold-=200;
+player.xpMultiplier+=0.25;
+
+player.inventory.push(
+"🍌✨ Banane Dorée +25%"
+);
+
+updateUI();
+}
+
+function buyLegendaryBanana(){
+
+if(player.gold<500) return;
+
+player.gold-=500;
+player.xpMultiplier+=0.50;
+
+player.inventory.push(
+"👑 Banane Légendaire +50%"
+);
+
+updateUI();
+}
+
+function buyCosmetic(emoji,price){
+
+if(player.gold<price){
+
+alert("Pas assez d'or");
+return;
+}
+
+player.gold-=price;
+player.ownedCosmetics.push(emoji);
+player.equippedCosmetic=emoji;
+
+updateUI();
+}
+
+function equipCosmetic(emoji){
+
+player.equippedCosmetic=emoji;
+updateUI();
+}
+
+function renderCosmeticShop(){
+
+let shop=document.getElementById(
+"cosmeticShop"
+);
+
+shop.innerHTML="";
+
+cosmetics.forEach(item=>{
+
+let owned=
+player.ownedCosmetics.includes(
+item.emoji
+);
+
+shop.innerHTML+=`
+
+<div class="inventory-item">
+
+<strong>${item.name}</strong><br>
+💰 ${item.price}
+
+<button onclick="${
+owned
+? `equipCosmetic('${item.emoji}')`
+: `buyCosmetic('${item.emoji}',${item.price})`
+}">
+
+${owned ? "Équiper" : "Acheter"}
+
+</button>
+
+</div>
+`;
+
+});
+}
+
+function checkAchievements(){
+
+const achievements=[
+
+{
+condition:player.completedTasks>=1,
+name:"🐒 Premier Pas"
+},
+
+{
+condition:player.completedTasks>=10,
+name:"💪 Travailleur"
+},
+
+{
+condition:player.completedTasks>=50,
+name:"🔥 Machine à Tâches"
+},
+
+{
+condition:player.level>=10,
+name:"🙉 Première Évolution"
+},
+
+{
+condition:player.level>=20,
+name:"🦍 Gorille Déchaîné"
+},
+
+{
+condition:player.level>=50,
+name:"🌟 Singe Cosmique"
+}
+
+];
+
+achievements.forEach(a=>{
+
+if(
+a.condition &&
+!player.achievements.includes(a.name)
+){
+player.achievements.push(a.name);
+}
+
+});
+}
+
+function renderTasks(){
+
+let container=
+document.getElementById("tasks");
+
+container.innerHTML="";
+
+tasks.forEach((task,index)=>{
+
+container.innerHTML+=`
+
+<div class="task">
+
+<div>
+
+<b>${task.name}</b><br>
+⭐ ${task.xp} XP
+
+</div>
+
+<button
+onclick="completeTask(${index})">
+
+Terminer
+
+</button>
+
+</div>
+`;
+});
+}
+
+function renderInventory(){
+
+let area=
+document.getElementById("inventory");
+
+area.innerHTML="";
+
+player.inventory.forEach(item=>{
+
+area.innerHTML+=`
+<div class="inventory-item">
+${item}
+</div>
+`;
+
+});
+}
+
+function renderAchievements(){
+
+let area=
+document.getElementById("achievements");
+
+area.innerHTML="";
+
+player.achievements.forEach(a=>{
+
+area.innerHTML+=`
+<div class="achievement">
+${a}
+</div>
+`;
+
+});
+}
+
+function updateUI(){
+
+if(
+player.level>=25 &&
+!player.ownedCosmetics.includes("💀🐒")
+){
+player.ownedCosmetics.push("💀🐒");
+}
+
+if(
+player.level>=75 &&
+!player.ownedCosmetics.includes("👼🐒")
+){
+player.ownedCosmetics.push("👼🐒");
+}
+
+if(
+player.prestige>=1 &&
+!player.ownedCosmetics.includes("🌟🐒")
+){
+player.ownedCosmetics.push("🌟🐒");
+}
+
+let need=xpNeeded();
+
+document.getElementById("level").textContent=player.level;
+document.getElementById("gold").textContent=player.gold;
+document.getElementById("totalXp").textContent=player.totalXp;
+document.getElementById("completedTasks").textContent=player.completedTasks;
+document.getElementById("completedTasksDisplay").textContent=player.completedTasks;
+document.getElementById("prestige").textContent=player.prestige;
+document.getElementById("bossLevel").textContent=player.bossLevel;
+document.getElementById("bossHealth").textContent=player.bossHealth;
+document.getElementById("streak").textContent=player.streak+" jours";
+document.getElementById("evolution").textContent=getMonkeyEvolution();
+document.getElementById("island").textContent=getIsland();
+
+document.getElementById("avatar").innerHTML=
+player.equippedCosmetic;
+
+document.getElementById("xpBonus").textContent=
+Math.round(
+player.xpMultiplier*100
+)+"%";
+
+document.getElementById("xpText").textContent=
+player.xp+" / "+need+" XP";
+
+document.getElementById("xpBar").style.width=
+(player.xp/need*100)+"%";
+
+renderTasks();
+renderInventory();
+renderAchievements();
+renderCosmeticShop();
+
+save();
+}
+
+updateUI();
+
+</script>
+</body>
+</html>
+``
